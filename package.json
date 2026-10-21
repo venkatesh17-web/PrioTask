@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "serve": "node server.js",
+    "start": "node dev-server.js",
+    "serve": "node dev-server.js",
     "demo": "node demo.js",
     "test": "node test/runTests.js"
   },

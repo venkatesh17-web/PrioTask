@@ -717,6 +717,51 @@ function init() {
   liveTickerInterval = setInterval(() => {
     renderAll();
   }, 2000);
+
+  // 8. Register PWA Service Worker & Install Handler
+  registerServiceWorker();
+}
+
+// ============================================================================
+// PWA Installation & Service Worker Logic
+// ============================================================================
+let deferredPrompt = null;
+const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        console.log('PrioTask PWA ServiceWorker registered:', reg.scope);
+      }).catch((err) => {
+        console.warn('PWA ServiceWorker registration notice:', err);
+      });
+    });
+  }
+
+  // Handle Chrome / Android 1-click install prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (pwaInstallBtn) {
+      pwaInstallBtn.style.display = 'inline-flex';
+      pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          showToast('Installing PrioTask to your device...', 'success');
+        }
+        deferredPrompt = null;
+        pwaInstallBtn.style.display = 'none';
+      });
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    showToast('PrioTask installed successfully!', 'success');
+    if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+  });
 }
 
 // Start application when DOM is ready

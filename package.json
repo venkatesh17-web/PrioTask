@@ -5,9 +5,10 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node demo.js",
-    "test": "node test/runTests.js",
-    "demo": "node demo.js"
+    "start": "node server.js",
+    "serve": "node server.js",
+    "demo": "node demo.js",
+    "test": "node test/runTests.js"
   },
   "keywords": [
     "min-heap",

@@ -1,6 +1,6 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
-  ]
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "cleanUrls": true
 }

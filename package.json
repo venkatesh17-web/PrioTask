@@ -2,7 +2,6 @@
   "name": "priority-task-scheduler",
   "version": "1.0.0",
   "description": "Core data structure and backend logic for a Priority-Based Task Scheduler using a custom Min-Heap in JavaScript",
-  "main": "src/index.js",
   "type": "module",
   "scripts": {
     "start": "node dev-server.js",

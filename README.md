@@ -68,9 +68,19 @@ d:/DS_Minifinal/
 
 ---
 
-## 🚀 Getting Started
+## 🌐 Live Production Deployment
 
-### 1. Run Automated Unit Tests (15 Tests)
+Your application is live in production on Vercel:
+**[https://priotask-eight.vercel.app](https://priotask-eight.vercel.app)**
+
+- **Vercel Project Dashboard:** [https://vercel.com/venkatesh-5247/priotask](https://vercel.com/venkatesh-5247/priotask)
+- **Deployment Status:** Active &bull; Zero-config Edge CDN &bull; SSL/TLS Enabled
+
+---
+
+## 🚀 Getting Started Locally
+
+### 1. Run Automated Unit Tests (19 Tests)
 ```bash
 node test/runTests.js
 ```
@@ -80,9 +90,9 @@ node test/runTests.js
 node demo.js
 ```
 
-### 3. Launch the Web Application
+### 3. Launch the Local Web Application
 ```bash
-node server.js
+node dev-server.js
 ```
 Open your browser and navigate to:
 **[http://localhost:3000](http://localhost:3000)**

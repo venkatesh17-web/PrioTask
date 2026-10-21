@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priority Task Scheduler | Min-Heap & Urgency Scoring</title>
+  <meta name="description" content="Custom Min-Heap based priority task scheduler with dynamic urgency scoring, zero-cost localStorage persistence, and multi-profile support.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="logo-group">
+          <div class="logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>Priority Scheduler</h1>
+            <span>O(log n) Min-Heap &bull; Dynamic Urgency</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Viewport Mode Switcher (Desktop vs Mobile Frame) -->
+          <div class="mode-toggle" title="Switch layout mode">
+            <button class="mode-btn active" id="mode-desktop-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+              Desktop
+            </button>
+            <button class="mode-btn" id="mode-mobile-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12" y2="18"/>
+              </svg>
+              Mobile View
+            </button>
+          </div>
+
+          <!-- Active Profile Button -->
+          <button class="profile-pill-btn" id="profile-modal-trigger" title="Switch or manage user profiles">
+            <div class="profile-avatar" id="active-profile-avatar">V</div>
+            <span id="active-profile-name">Venkatesh</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+
+          <!-- Primary Add Task Action -->
+          <button class="btn btn-primary btn-sm" id="open-add-task-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Task
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Viewport Area -->
+    <main class="main-viewport">
+      <div class="content-container" id="content-container">
+        <!-- Optional Mobile Frame Notch -->
+        <div class="mobile-frame-notch"></div>
+
+        <div class="dashboard-grid">
+          <!-- Left/Main Column: Hero Card & Priority Task Queue -->
+          <section class="main-column">
+            <!-- Hero Card: Most Urgent Task (O(1) Heap Root) -->
+            <div class="hero-card" id="hero-card">
+              <!-- Populated dynamically via app.js -->
+              <div class="hero-empty" id="hero-empty-state">
+                <div class="hero-empty-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <h3>All Caught Up!</h3>
+                <p>No pending tasks in the min-heap. Add a new task or switch profiles to get started.</p>
+                <button class="btn btn-primary btn-sm" style="margin-top: 1rem;" id="hero-add-task-btn">+ Create Task</button>
+              </div>
+            </div>
+
+            <!-- Task List Header -->
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <h2 class="section-title">Active Task Queue</h2>
+                <span class="task-count-pill" id="total-task-count">0</span>
+              </div>
+              <div class="view-filter-bar">
+                <select class="filter-select" id="task-view-order">
+                  <option value="urgency">Sort: By Urgency Rating</option>
+                  <option value="heap">Sort: By Min-Heap Array Index</option>
+                  <option value="deadline">Sort: By Absolute Deadline</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" id="refresh-urgency-btn" title="Recalculate urgency scores and restore heap invariant">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                  </svg>
+                  Re-Heapify
+                </button>
+              </div>
+            </div>
+
+            <!-- Tasks Container -->
+            <div class="task-list" id="task-list-container">
+              <!-- Dynamic Task Cards -->
+            </div>
+          </section>
+
+          <!-- Right Sidebar: Heap Data Structure Inspector & Algorithm Explainer -->
+          <aside class="sidebar-panel">
+            <!-- Simulated Clock Strip -->
+            <div class="widget-card">
+              <div class="widget-title">
+                <span>Scheduler Clock</span>
+                <span class="preset-chip" id="sim-status-chip">Live Time</span>
+              </div>
+              <div class="clock-strip">
+                <span id="current-sim-time-text">--:--:--</span>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button class="preset-chip" id="time-plus-15m" title="Advance time by 15 minutes">+15m</button>
+                  <button class="preset-chip" id="time-plus-1h" title="Advance time by 1 hour">+1h</button>
+                  <button class="preset-chip" id="time-reset-now" title="Reset to current real-world time">Now</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Min-Heap Internal Visualizer -->
+            <div class="widget-card">
+              <div class="widget-title">
+                <span>Min-Heap Tree Topology</span>
+                <span class="task-count-pill" id="heap-size-pill">0 nodes</span>
+              </div>
+              <p style="font-size: 0.76rem; color: var(--text-body); margin-bottom: 0.6rem;">
+                Parent at <code>Math.floor((i-1)/2)</code>, Children at <code>2i+1</code> &amp; <code>2i+2</code>.
+              </p>
+              <div class="heap-tree-visual" id="heap-tree-view">(empty heap)</div>
+
+              <div style="margin-top: 0.85rem;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Array Storage [0..n-1]</span>
+                <div class="array-indices-strip" id="array-indices-strip"></div>
+              </div>
+            </div>
+
+            <!-- Urgency Scoring Math Explainer -->
+            <div class="widget-card">
+              <div class="widget-title">
+                <span>Urgency Scoring Logic</span>
+              </div>
+              <div class="formula-box">
+                <strong>Upcoming Tasks:</strong>
+                <code>Score = (W * 1000) / (m + 15)</code>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 2px;">
+                  Where W = Priority Weight, m = minutes remaining.
+                </span>
+              </div>
+              <div class="formula-box" style="border-left-color: var(--priority-high);">
+                <strong>Overdue Tasks:</strong>
+                <code>Score = 10,000 + (|m| * 50 * W)</code>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 2px;">
+                  Overdue tasks strictly dominate all upcoming tasks.
+                </span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; justify-content: space-between; font-size: 0.75rem;">
+                <span class="priority-badge priority-high"><span class="badge-dot"></span>HIGH: W = 3</span>
+                <span class="priority-badge priority-medium"><span class="badge-dot"></span>MED: W = 2</span>
+                <span class="priority-badge priority-low"><span class="badge-dot"></span>LOW: W = 1</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- =======================================================================
+       Add Task Modal
+       ======================================================================= -->
+  <div class="modal-overlay" id="add-task-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Task</h3>
+        <button class="modal-close-btn" id="close-add-modal">&times;</button>
+      </div>
+      <form id="add-task-form">
+        <div class="form-group">
+          <label class="form-label" for="task-title-input">Task Title *</label>
+          <input type="text" id="task-title-input" class="form-input" placeholder="e.g. Renew SSL Certificates" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-desc-input">Description / Context</label>
+          <textarea id="task-desc-input" class="form-textarea" placeholder="Add specific technical notes or steps..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Priority Level *</label>
+          <div class="priority-options-grid">
+            <label class="priority-radio-label opt-high">
+              <input type="radio" name="priority" value="HIGH" required>
+              <span>HIGH</span>
+              <small style="font-size: 0.7rem; font-weight: normal;">Weight: 3</small>
+            </label>
+            <label class="priority-radio-label opt-medium">
+              <input type="radio" name="priority" value="MEDIUM" checked>
+              <span>MEDIUM</span>
+              <small style="font-size: 0.7rem; font-weight: normal;">Weight: 2</small>
+            </label>
+            <label class="priority-radio-label opt-low">
+              <input type="radio" name="priority" value="LOW">
+              <span>LOW</span>
+              <small style="font-size: 0.7rem; font-weight: normal;">Weight: 1</small>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-deadline-input">Deadline Timestamp *</label>
+          <input type="datetime-local" id="task-deadline-input" class="form-input" required>
+          <div class="preset-chips-wrap">
+            <span style="font-size: 0.72rem; color: var(--text-muted); align-self: center;">Quick Presets:</span>
+            <button type="button" class="preset-chip" data-offset="15">+15 mins</button>
+            <button type="button" class="preset-chip" data-offset="60">+1 hour</button>
+            <button type="button" class="preset-chip" data-offset="240">+4 hours</button>
+            <button type="button" class="preset-chip" data-offset="1440">+1 day</button>
+            <button type="button" class="preset-chip" data-offset="-10" style="color: var(--priority-high);">&minus;10m (Overdue Test)</button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-add-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Schedule Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       Profile Switcher & Management Modal
+       ======================================================================= -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Local Profiles ($0 Persistence)</h3>
+        <button class="modal-close-btn" id="close-profile-modal">&times;</button>
+      </div>
+
+      <p style="font-size: 0.82rem; color: var(--text-body); margin-bottom: 1.25rem;">
+        Tasks and Min-Heap state are automatically serialized to isolated <code>localStorage</code> keys per user profile.
+      </p>
+
+      <div id="profile-list-wrap">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 1.25rem 0;">
+
+      <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Create New Profile</h4>
+      <form id="create-profile-form">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <input type="text" id="new-profile-name-input" class="form-input" placeholder="e.g. Sontakke, DevOps, or Personal" required>
+          <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Create</button>
+        </div>
+        <label style="font-size: 0.78rem; color: var(--text-body); display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+          <input type="checkbox" id="populate-sample-tasks-check" checked>
+          Pre-populate with sample urgent tasks
+        </label>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Stack -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

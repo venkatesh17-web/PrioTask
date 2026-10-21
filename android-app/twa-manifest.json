@@ -1,0 +1,36 @@
+{
+  "packageId": "app.vercel.priotask.twa",
+  "host": "priotask-eight.vercel.app",
+  "name": "PrioTask",
+  "launcherName": "PrioTask",
+  "display": "standalone",
+  "themeColor": "#0F172A",
+  "themeColorDark": "#0F172A",
+  "navigationColor": "#0F172A",
+  "navigationColorDark": "#0F172A",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#F4F5F9",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://priotask-eight.vercel.app/assets/icon-512.png",
+  "maskableIconUrl": "https://priotask-eight.vercel.app/assets/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://priotask-eight.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false
+}

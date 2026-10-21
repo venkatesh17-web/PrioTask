@@ -1,0 +1,16 @@
+=====================================================
+  PrioTask - Mobile Installation Guide
+=====================================================
+
+METHOD 1: Instant PWA Install (Recommended)
+1. On your Motorola phone, open Google Chrome.
+2. Visit: https://priotask-eight.vercel.app
+3. You will see an 'Install App' button right in the header, OR:
+   Tap the Chrome menu (three dots ⋮ in the top right).
+4. Tap 'Install app' or 'Add to Home screen'.
+5. PrioTask will be installed as a full standalone app
+   with its own app icon and splash screen!
+
+METHOD 2: Offline Launcher
+Open 'PrioTask-Launcher.html' directly in your phone's browser.
+=====================================================
